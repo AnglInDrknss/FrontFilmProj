@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { removeFromFavorites } from '../services/favorites';
 
 type Movie = {
     id: string;
@@ -10,20 +9,14 @@ type Movie = {
     }
 };
 
-export default function Favorites() {
+export default function History() {
     const navigate = useNavigate();
     const [movies, setMovies] = useState<Movie[]>([]);
 
     useEffect(() => {
-        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-        setMovies(favorites);
+        const history = JSON.parse(localStorage.getItem("movieHistory") || "[]");
+        setMovies(history);
     }, []);
-
-    const handleRemove = (movieId: string) => {
-        removeFromFavorites(movieId);
-        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-        setMovies(favorites);
-    };
 
     return (
         <div>
@@ -35,9 +28,9 @@ export default function Favorites() {
                     Back to Home
                 </button>
             </div>
-            <h1 className='text-2xl font-bold mb-4'>Favorites</h1>
+            <h1 className='text-2xl font-bold mb-4'>History</h1>
             {movies.length === 0 ? (
-                <p>No movies added to favorites yet</p>
+                <p>No movies viewed yet</p>
             ) : (
                 <div className="grid grid-cols-4 gap-4">
                     {movies.map((movie) => (
@@ -46,12 +39,6 @@ export default function Favorites() {
                             <Link to={`/movie/${movie.id}`}>
                                 <h3>{movie.originalTitle}</h3>
                             </Link>
-                            <button 
-                                onClick={() => handleRemove(movie.id)}
-                                className='p-3 bg-red-500 text-white rounded-md mt-2 w-full'
-                            >
-                                Remove from Favorites
-                            </button>
                         </div>
                     ))}
                 </div>

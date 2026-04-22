@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { boardMovies, searchMovies } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { addToFavorites, getFavorites, removeFromFavorites } from '../services/favorites';
 
 type Movie = {
@@ -11,7 +11,9 @@ type Movie = {
     }
 }
 
+
 export default function Home() {
+    const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [movies, setMovies] = useState<Movie[]>([]);
     const [favorites, setFavorites] = useState(getFavorites());
@@ -28,35 +30,47 @@ export default function Home() {
         });
     };
 
-    const handleFavorites = (movieId: string) => {
-        if (getFavorites().includes(movieId)) {
-            removeFromFavorites(movieId);
+    const handleFavorites = (movie: Movie) => {
+        if (getFavorites().some(m => m.id === movie.id)) {
+            removeFromFavorites(movie.id);
             setFavorites(getFavorites());
         } else {
-            addToFavorites(movieId);
+            addToFavorites(movie);
             setFavorites(getFavorites());
         }
     };
 
     return (
         <div>
-            <input 
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)} 
-            />
-            <button onClick={handleSearch}>Search</button>
-            <div className="grid grid-cols-4 gap-2">
+            <div className='flex justify-start gap-4 mb-4 pt-4 px-4'>
+                <input 
+                    className='border p-2 rounded-md'
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)} 
+                />
+                <button className='p-2 bg-blue-500 text-white rounded-md' onClick={handleSearch}>Search</button>
+                <button className='p-2 bg-gray-500 text-white rounded-md' onClick={() => navigate('/history')}>history</button>
+                <button className='p-2 bg-black text-white rounded-md' onClick={() => navigate('/favorites')}>favorites</button>
+            </div>
+            <div className="grid grid-cols-4 gap-4">
                 {movies.map((movie) => (
                     <div className="p-2" key={movie.id}>
                         <img src={movie?.primaryImage?.url} alt={movie.originalTitle} />
-                        <Link to={`/movie/${movie.id}`}>
+                        <Link to={`/movie/${movie.id}`} onClick={() => {
+                            const history = JSON.parse(localStorage.getItem("movieHistory") || "[]");
+                            const exists = history.some((m: Movie) => m.id === movie.id);
+                            if (!exists) {
+                                history.push(movie);
+                                localStorage.setItem("movieHistory", JSON.stringify(history));
+                            }
+                        }}>
                             <h3>{movie.originalTitle}</h3>
                         </Link>
-                        {getFavorites().includes(movie.id) ? (
-                            <button onClick={() => handleFavorites(movie.id)} className='p-3 bg-gray-500'>Remove from Favorites</button>
+                        {getFavorites().some(m => m.id === movie.id) ? (
+                            <button onClick={() => handleFavorites(movie)} className='p-3 bg-gray-500'>Remove from Favorites</button>
                         ) : (
-                            <button onClick={() => handleFavorites(movie.id)} className='p-3 bg-red-500'>Add to Favorites</button>
+                            <button onClick={() => handleFavorites(movie)} className='p-3 bg-red-500'>Add to Favorites</button>
                         )}
                     </div>
                 ))}
