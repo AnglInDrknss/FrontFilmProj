@@ -10,11 +10,10 @@ type Movie = {
     primaryImage?: {
         url: string;
     }
-    runtimeMinutes?: number;
-    actors?: Array<{
-        name: string;
-    }>;
-    imdbRating?: number;
+    runtimeSeconds?: number;
+    rating?: {
+        aggregateRating?: number;
+    };
 }
 
 export default function MovieDetails() {
@@ -54,7 +53,7 @@ export default function MovieDetails() {
                     <img 
                         className='w-64 h-auto rounded-lg shadow-lg' 
                         src={movie?.primaryImage?.url} 
-                        alt={movie?.titles?.[movie.id]} 
+                        alt={movie?.originalTitle} 
                     />
                     <button
                         onClick={handleFavorite}
@@ -70,24 +69,36 @@ export default function MovieDetails() {
                     <h1 className="text-4xl font-bold mb-4">{movie?.originalTitle}</h1>
                     
                     <div className="space-y-3 mb-6">
-                        {movie?.releaseDate && (
+                        {movie?.startYear && (
                             <div>
                                 <span className="font-semibold">Release Date:</span>
-                                <p>{movie.releaseDate}</p>
+                                <p>{movie.startYear}</p>
                             </div>
                         )}
                         
-                        {movie?.runtimeMinutes && (
+                        {movie?.runtimeSeconds && (
                             <div>
                                 <span className="font-semibold">Duration:</span>
-                                <p>{movie.runtimeMinutes} minutes</p>
+                                <p>{Math.floor(movie.runtimeSeconds / 60)} minutes</p>
                             </div>
                         )}
 
-                        {movie?.imdbRating && (
+                        {movie?.rating?.aggregateRating && (
                             <div>
                                 <span className="font-semibold">Rating:</span>
-                                <p className="text-yellow-500 text-lg">★ {movie.imdbRating}/10</p>
+                                <p className="text-yellow-500 text-lg">★ {movie.rating?.aggregateRating}/10</p>
+                            </div>
+                        )}
+                        {movie?.plot && (
+                            <div>
+                                <span className="font-semibold">Description:</span>
+                                <p>{movie.plot}</p>
+                            </div>
+                        )}
+                        {movie?.genres && (
+                            <div>
+                                <span className="font-semibold">Genres:</span>
+                                <p>{movie.genres.join(', ')}</p>
                             </div>
                         )}
                     </div>
